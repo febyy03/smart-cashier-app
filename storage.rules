@@ -1,0 +1,77 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isCashier() {
+      return isAuthenticated() &&
+             firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'cashier';
+    }
+
+    function canAccessBusinessData() {
+      return isAdmin() || isCashier();
+    }
+
+    // Product images
+    match /products/{productId}/{fileName} {
+      // Business users can read all product images
+      allow read: if canAccessBusinessData();
+
+      // Only admins can upload/update product images
+      allow write: if isAdmin() &&
+                      request.auth.uid == productId; // productId should be the uploader's ID or validated
+
+      // Allow deletion by admins
+      allow delete: if isAdmin();
+    }
+
+    // User profile images (if implemented)
+    match /users/{userId}/profile/{fileName} {
+      // Users can manage their own profile images
+      allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Receipt images or documents (if implemented)
+    match /receipts/{transactionId}/{fileName} {
+      // Business users can read receipt files
+      allow read: if canAccessBusinessData();
+
+      // Business users can upload receipt files
+      allow write: if canAccessBusinessData();
+
+      // Only admins can delete receipt files
+      allow delete: if isAdmin();
+    }
+
+    // General business documents
+    match /documents/{fileName} {
+      // Only admins can manage business documents
+      allow read, write, delete: if isAdmin();
+    }
+
+    // Temporary files (for processing)
+    match /temp/{userId}/{fileName} {
+      // Users can manage their own temporary files
+      allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Public assets (if any)
+    match /public/{fileName} {
+      // Allow public read access for public assets
+      allow read: if true;
+
+      // Only admins can upload public assets
+      allow write, delete: if isAdmin();
+    }
+  }
+}

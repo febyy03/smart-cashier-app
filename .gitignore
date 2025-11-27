@@ -1,0 +1,79 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock
+pubspec.lock
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+build/
+.packages
+.pub/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/key.properties
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/build/
+/android/app/google-services.json
+
+# CocoaPods related
+ios/Pods/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Test files
+test_firebase.dart
+
+# Coverage
+coverage/
+
+# Exceptions to above rules.
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.pbxproj
+
+# Web
+lib/generated_plugin_registrant.dart
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp

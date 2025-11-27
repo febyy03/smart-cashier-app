@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isCashier() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'cashier';
+    }
+
+    function canAccessBusinessData() {
+      return isAdmin() || isCashier();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read and write their own data
+      allow read, write: if isOwner(userId);
+
+      // Admins can read all users
+      allow read: if isAdmin();
+
+      // New user registration
+      allow create: if request.auth != null &&
+                       request.auth.uid == userId;
+    }
+
+    // Products collection
+    match /products/{productId} {
+      // Business users can read all products
+      allow read: if canAccessBusinessData();
+
+      // Only admins can create, update, delete products
+      allow write: if isAdmin();
+    }
+
+    // Categories collection
+    match /categories/{categoryId} {
+      // Business users can read all categories
+      allow read: if canAccessBusinessData();
+
+      // Only admins can manage categories
+      allow write: if isAdmin();
+    }
+
+    // Transactions collection
+    match /transactions/{transactionId} {
+      // Business users can read all transactions
+      allow read: if canAccessBusinessData();
+
+      // Business users can create transactions
+      allow create: if canAccessBusinessData();
+
+      // Only admins can update or delete transactions
+      allow update, delete: if isAdmin();
+    }
+
+    // Settings collection (for app-wide settings)
+    match /settings/{settingId} {
+      // Only admins can manage settings
+      allow read, write: if isAdmin();
+    }
+  }
+}
