@@ -56,11 +56,14 @@ class AuthService {
     required String name,
     required UserRole role,
   }) async {
+    print('🔥 Starting user registration for email: $email');
     try {
+      print('📧 Creating Firebase Auth user...');
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      print('✅ Firebase Auth user created with UID: ${credential.user!.uid}');
 
       final user = UserModel(
         id: credential.user!.uid,
@@ -71,14 +74,21 @@ class AuthService {
         isActive: true,
       );
 
+      print('💾 Saving user data to Firestore...');
       await _firestore
           .collection('users')
           .doc(credential.user!.uid)
           .set(user.toFirestore());
+      print('✅ User data saved to Firestore successfully');
 
+      print('🎉 Registration completed successfully');
       return user;
     } on FirebaseAuthException catch (e) {
+      print('❌ Firebase Auth error during registration: ${e.code} - ${e.message}');
       throw _handleAuthException(e);
+    } catch (e) {
+      print('❌ Unexpected error during registration: $e');
+      rethrow;
     }
   }
 

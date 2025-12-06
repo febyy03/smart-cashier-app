@@ -51,21 +51,25 @@ class AuthProvider with ChangeNotifier {
     required String name,
     required UserRole role,
   }) async {
+    print('🚀 AuthProvider: Starting registration process');
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
+      print('🔄 AuthProvider: Calling auth service register...');
       _currentUser = await _authService.register(
         email: email,
         password: password,
         name: name,
         role: role,
       );
+      print('✅ AuthProvider: Registration successful, user: ${_currentUser?.name}');
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      print('❌ AuthProvider: Registration failed with error: $e');
       _errorMessage = e.toString();
       _isLoading = false;
       notifyListeners();
