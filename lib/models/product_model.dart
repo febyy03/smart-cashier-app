@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductModel {
   final String id;
@@ -27,37 +26,22 @@ class ProductModel {
     required this.updatedAt,
   });
 
-  factory ProductModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: doc.id,
-      name: data['name'] ?? '',
-      price: (data['price'] ?? 0).toDouble(),
-      stock: data['stock'] ?? 0,
-      categoryId: data['categoryId'] ?? '',
-      categoryName: data['categoryName'] ?? '',
-      imageUrl: data['imageUrl'] ?? '',
-      barcode: data['barcode'],
-      isArchived: data['isArchived'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      stock: json['stock'] ?? 0,
+      categoryId: json['category_id']?.toString() ?? '',
+      categoryName: '', // Will be loaded separately or from relation
+      imageUrl: json['image_url'] ?? '',
+      barcode: json['barcode'],
+      isArchived: false, // Assume not archived
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 
-  Map<String, dynamic> toFirestore() {
-    return {
-      'name': name,
-      'price': price,
-      'stock': stock,
-      'categoryId': categoryId,
-      'categoryName': categoryName,
-      'imageUrl': imageUrl,
-      'barcode': barcode,
-      'isArchived': isArchived,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-    };
-  }
 
   ProductModel copyWith({
     String? id,

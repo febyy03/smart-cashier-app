@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum UserRole { admin, cashier }
 
 class UserModel {
@@ -19,27 +17,17 @@ class UserModel {
     this.isActive = true,
   });
 
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: doc.id,
-      email: data['email'] ?? '',
-      name: data['name'] ?? '',
-      role: data['role'] == 'admin' ? UserRole.admin : UserRole.cashier,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isActive: data['isActive'] ?? true,
+      id: (json['id'] ?? '').toString(),
+      email: json['email'] ?? '',
+      name: json['name'] ?? '',
+      role: json['role'] == 'admin' ? UserRole.admin : UserRole.cashier,
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      isActive: true, // Assume active
     );
   }
 
-  Map<String, dynamic> toFirestore() {
-    return {
-      'email': email,
-      'name': name,
-      'role': role == UserRole.admin ? 'admin' : 'cashier',
-      'createdAt': Timestamp.fromDate(createdAt),
-      'isActive': isActive,
-    };
-  }
 
   UserModel copyWith({
     String? id,

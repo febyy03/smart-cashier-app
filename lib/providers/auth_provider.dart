@@ -20,11 +20,13 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> _initializeAuth() async {
-    final user = _authService.currentUser;
-    if (user != null) {
-      _currentUser = await _authService.getUserData(user.uid);
-      notifyListeners();
+    try {
+      _currentUser = await _authService.getCurrentUser();
+    } catch (e) {
+      // If getCurrentUser fails, user is not authenticated
+      _currentUser = null;
     }
+    notifyListeners();
   }
 
   Future<bool> signIn(String email, String password) async {

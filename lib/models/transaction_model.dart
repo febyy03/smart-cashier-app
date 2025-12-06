@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TransactionItem {
   final String productId;
@@ -65,40 +64,22 @@ class TransactionModel {
     required this.receiptNumber,
   });
 
-  factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
-      id: doc.id,
-      cashierId: data['cashierId'] ?? '',
-      cashierName: data['cashierName'] ?? '',
-      items: (data['items'] as List<dynamic>)
-          .map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
-          .toList(),
-      subtotal: (data['subtotal'] ?? 0).toDouble(),
-      tax: (data['tax'] ?? 0).toDouble(),
-      discount: (data['discount'] ?? 0).toDouble(),
-      total: (data['total'] ?? 0).toDouble(),
-      paymentMethod: data['paymentMethod'] == 'cash'
-          ? PaymentMethod.cash
-          : PaymentMethod.digital,
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-      receiptNumber: data['receiptNumber'] ?? '',
+      id: json['id']?.toString() ?? '',
+      cashierId: json['user_id']?.toString() ?? '',
+      cashierName: '', // Not in API response
+      items: (json['items'] as List<dynamic>?)
+          ?.map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
+          .toList() ?? [],
+      subtotal: 0, // Calculate or from API
+      tax: 0,
+      discount: 0,
+      total: (json['total'] ?? 0).toDouble(),
+      paymentMethod: PaymentMethod.cash, // Default
+      timestamp: DateTime.parse(json['transaction_date'] ?? DateTime.now().toIso8601String()),
+      receiptNumber: '', // Generate or from API
     );
   }
 
-  Map<String, dynamic> toFirestore() {
-    return {
-      'cashierId': cashierId,
-      'cashierName': cashierName,
-      'items': items.map((item) => item.toMap()).toList(),
-      'subtotal': subtotal,
-      'tax': tax,
-      'discount': discount,
-      'total': total,
-      'paymentMethod':
-          paymentMethod == PaymentMethod.cash ? 'cash' : 'digital',
-      'timestamp': Timestamp.fromDate(timestamp),
-      'receiptNumber': receiptNumber,
-    };
-  }
 }

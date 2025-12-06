@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product_model.dart';
 import '../models/transaction_model.dart';
+import 'product_service.dart';
 import 'transaction_service.dart';
 
 class RecommendationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ProductService _productService = ProductService();
   final TransactionService _transactionService = TransactionService();
 
   // Get frequently bought together products
@@ -108,15 +108,8 @@ class RecommendationService {
     int limit = 10,
   }) async {
     try {
-      final snapshot = await _firestore
-          .collection('products')
-          .where('isArchived', isEqualTo: false)
-          .where('stock', isGreaterThanOrEqualTo: minStock)
-          .orderBy('stock', descending: true)
-          .limit(limit)
-          .get();
-
-      return snapshot.docs.map((doc) => ProductModel.fromFirestore(doc)).toList();
+      final products = await _productService.getProducts();
+      return products.where((p) => p.stock >= minStock).take(limit).toList();
     } catch (e) {
       print('Error getting high stock recommendations: $e');
       return [];
@@ -267,15 +260,8 @@ class RecommendationService {
     int limit = 20,
   }) async {
     try {
-      final snapshot = await _firestore
-          .collection('products')
-          .where('isArchived', isEqualTo: false)
-          .where('stock', isLessThanOrEqualTo: threshold)
-          .orderBy('stock')
-          .limit(limit)
-          .get();
-
-      return snapshot.docs.map((doc) => ProductModel.fromFirestore(doc)).toList();
+      final products = await _productService.getProducts();
+      return products.where((p) => p.stock <= threshold).take(limit).toList();
     } catch (e) {
       print('Error getting restock recommendations: $e');
       return [];

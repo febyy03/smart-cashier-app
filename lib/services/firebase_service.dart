@@ -7,7 +7,6 @@ class FirebaseService {
     try {
       // For development/testing - you can use Firebase Emulator
       // Uncomment the lines below if you want to use Firebase Emulator
-      /*
       await Firebase.initializeApp(
         options: const FirebaseOptions(
           apiKey: 'demo-key',
@@ -16,10 +15,10 @@ class FirebaseService {
           projectId: 'demo-project',
         ),
       );
-      */
 
       // Production Firebase configuration
       // REPLACE THESE VALUES WITH YOUR ACTUAL FIREBASE CONFIG
+      /*
       await Firebase.initializeApp(
         options: const FirebaseOptions(
           apiKey: 'YOUR_API_KEY_HERE',
@@ -29,6 +28,7 @@ class FirebaseService {
           storageBucket: 'YOUR_STORAGE_BUCKET_HERE',
         ),
       );
+      */
 
       if (kDebugMode) {
         print('✅ Firebase initialized successfully');
