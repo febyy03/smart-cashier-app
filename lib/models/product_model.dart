@@ -30,10 +30,10 @@ class ProductModel {
     return ProductModel(
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       stock: json['stock'] ?? 0,
       categoryId: json['category_id']?.toString() ?? '',
-      categoryName: '', // Will be loaded separately or from relation
+      categoryName: json['category']?['name'] ?? '', // Extract from nested category object
       imageUrl: json['image_url'] ?? '',
       barcode: json['barcode'],
       isArchived: false, // Assume not archived

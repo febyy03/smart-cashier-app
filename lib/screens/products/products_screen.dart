@@ -33,8 +33,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> _loadData() async {
+    print('ProductsScreen: Starting to load data');
     final productProvider = context.read<ProductProvider>();
     await productProvider.loadAllData();
+    print('ProductsScreen: Finished loading data');
   }
 
   void _onSearchChanged(String query) {
@@ -142,7 +144,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
           // Categories Filter
           Consumer<ProductProvider>(
             builder: (context, provider, child) {
+              print('ProductsScreen: Building categories section with ${provider.categories.length} categories');
               if (provider.categories.isEmpty) {
+                print('ProductsScreen: No categories available, hiding categories section');
                 return const SizedBox.shrink();
               }
 
@@ -220,6 +224,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 }
 
                 final filteredProducts = _getFilteredProducts(provider);
+                print('ProductsScreen: Displaying ${filteredProducts.length} filtered products from ${provider.products.length} total products');
 
                 if (filteredProducts.isEmpty) {
                   return Center(

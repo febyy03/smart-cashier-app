@@ -1,45 +1,62 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 import '../models/category_model.dart';
 
 class ProductService {
-  final Dio _dio = Dio();
-  final String baseUrl = kIsWeb ? 'http://localhost:8000/api' : 'http://10.0.2.2:8000/api';
+  final String baseUrl = kIsWeb ? 'http://127.0.0.1:8080/api' : 'http://10.0.2.2:8000/api';
 
-  ProductService() {
-    _dio.options.baseUrl = baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('token');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
-      },
-    ));
+  Future<Map<String, String>> _getHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
   }
 
   // Product CRUD Operations
   Future<List<ProductModel>> getProducts() async {
     try {
-      final response = await _dio.get('/products');
-      final data = response.data as List;
-      return data.map((json) => ProductModel.fromJson(json)).toList();
+      final headers = await _getHeaders();
+      print('ProductService: Making request to $baseUrl/products');
+      print('ProductService: Headers: $headers');
+
+      final response = await http.get(Uri.parse('$baseUrl/products'), headers: headers);
+      print('ProductService: Response status: ${response.statusCode}');
+      print('ProductService: Response body length: ${response.body.length}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        print('ProductService: Parsed ${data.length} products');
+        final products = data.map((json) => ProductModel.fromJson(json)).toList();
+        print('ProductService: Successfully created ${products.length} ProductModel objects');
+        return products;
+      } else {
+        print('ProductService: Failed with status ${response.statusCode}: ${response.body}');
+        throw Exception('Failed to load products: ${response.statusCode}');
+      }
     } catch (e) {
+      print('ProductService: Exception occurred: $e');
       throw Exception('Failed to load products: $e');
     }
   }
 
   Future<List<ProductModel>> searchProducts(String query) async {
     try {
-      final response = await _dio.get('/products', queryParameters: {'search': query});
-      final data = response.data as List;
-      return data.map((json) => ProductModel.fromJson(json)).toList();
+      final headers = await _getHeaders();
+      final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {'search': query});
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        return data.map((json) => ProductModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to search products: ${response.statusCode}');
+      }
     } catch (e) {
       throw Exception('Failed to search products: $e');
     }
@@ -47,9 +64,16 @@ class ProductService {
 
   Future<List<ProductModel>> getProductsByCategory(String categoryId) async {
     try {
-      final response = await _dio.get('/products', queryParameters: {'category_id': categoryId});
-      final data = response.data as List;
-      return data.map((json) => ProductModel.fromJson(json)).toList();
+      final headers = await _getHeaders();
+      final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {'category_id': categoryId});
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        return data.map((json) => ProductModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load products by category: ${response.statusCode}');
+      }
     } catch (e) {
       throw Exception('Failed to load products by category: $e');
     }
@@ -57,8 +81,14 @@ class ProductService {
 
   Future<ProductModel?> getProductById(String id) async {
     try {
-      final response = await _dio.get('/products/$id');
-      return ProductModel.fromJson(response.data);
+      final headers = await _getHeaders();
+      final response = await http.get(Uri.parse('$baseUrl/products/$id'), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return ProductModel.fromJson(data);
+      }
+      return null;
     } catch (e) {
       return null;
     }
@@ -66,14 +96,25 @@ class ProductService {
 
   Future<String> addProduct(ProductModel product) async {
     try {
-      final response = await _dio.post('/products', data: {
-        'name': product.name,
-        'price': product.price,
-        'stock': product.stock,
-        'unit': 'pcs', // Default
-        'category_id': product.categoryId,
-      });
-      return response.data['id'].toString();
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/products'),
+        headers: headers,
+        body: json.encode({
+          'name': product.name,
+          'price': product.price,
+          'stock': product.stock,
+          'unit': 'pcs', // Default
+          'category_id': product.categoryId,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data['id'].toString();
+      } else {
+        throw Exception('Failed to add product: ${response.statusCode}');
+      }
     } catch (e) {
       throw Exception('Failed to add product: $e');
     }
@@ -81,13 +122,18 @@ class ProductService {
 
   Future<void> updateProduct(ProductModel product) async {
     try {
-      await _dio.put('/products/${product.id}', data: {
-        'name': product.name,
-        'price': product.price,
-        'stock': product.stock,
-        'unit': 'pcs',
-        'category_id': product.categoryId,
-      });
+      final headers = await _getHeaders();
+      await http.put(
+        Uri.parse('$baseUrl/products/${product.id}'),
+        headers: headers,
+        body: json.encode({
+          'name': product.name,
+          'price': product.price,
+          'stock': product.stock,
+          'unit': 'pcs',
+          'category_id': product.categoryId,
+        }),
+      );
     } catch (e) {
       throw Exception('Failed to update product: $e');
     }
@@ -95,7 +141,12 @@ class ProductService {
 
   Future<void> deleteProduct(String id) async {
     try {
-      await _dio.delete('/products/$id');
+      final headers = await _getHeaders();
+      final response = await http.delete(Uri.parse('$baseUrl/products/$id'), headers: headers);
+
+      if (response.statusCode != 204 && response.statusCode != 200) {
+        throw Exception('Failed to delete product: ${response.statusCode}');
+      }
     } catch (e) {
       throw Exception('Failed to delete product: $e');
     }
@@ -104,13 +155,24 @@ class ProductService {
   // Category Operations
   Future<List<CategoryModel>> getCategories() async {
     try {
-      // For now, return static categories since API may not have separate endpoint
-      return [
-        CategoryModel(id: '1', name: 'Food', icon: '🍔', color: '#FF6B6B'),
-        CategoryModel(id: '2', name: 'Drinks', icon: '🥤', color: '#4ECDC4'),
-        CategoryModel(id: '3', name: 'Snacks', icon: '🍿', color: '#45B7D1'),
-      ];
+      final headers = await _getHeaders();
+      print('ProductService: Making request to $baseUrl/categories');
+
+      final response = await http.get(Uri.parse('$baseUrl/categories'), headers: headers);
+      print('ProductService: Categories response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        print('ProductService: Parsed ${data.length} categories');
+        final categories = data.map((json) => CategoryModel.fromJson(json)).toList();
+        print('ProductService: Successfully created ${categories.length} CategoryModel objects');
+        return categories;
+      } else {
+        print('ProductService: Failed with status ${response.statusCode}: ${response.body}');
+        throw Exception('Failed to load categories: ${response.statusCode}');
+      }
     } catch (e) {
+      print('ProductService: Exception occurred: $e');
       throw Exception('Failed to load categories: $e');
     }
   }

@@ -24,6 +24,15 @@ class CategoryModel {
     );
   }
 
+  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    return CategoryModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      icon: json['icon'] ?? 'category',
+      color: json['color'] ?? '#2196F3',
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,

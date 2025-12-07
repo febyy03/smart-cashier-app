@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::apiResource('products', ProductController::class);
+    Route::get('/categories', [ProductController::class, 'categoriesIndex']);
     Route::apiResource('transactions', TransactionController::class)->except(['update', 'destroy']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
