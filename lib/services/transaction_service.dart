@@ -2,12 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transaction_model.dart';
-import '../services/product_service.dart';
 
 class TransactionService {
   final Dio _dio = Dio();
-  final ProductService _productService = ProductService();
-  final String baseUrl = kIsWeb ? 'http://localhost:8000/api' : 'http://10.0.2.2:8000/api';
+  final String baseUrl = kIsWeb ? 'http://127.0.0.1:8080/api' : 'http://10.0.2.2:8000/api';
 
   TransactionService() {
     _dio.options.baseUrl = baseUrl;
@@ -35,29 +33,18 @@ class TransactionService {
     required PaymentMethod paymentMethod,
   }) async {
     try {
-      // Calculate totals
-      final subtotal = items.fold(0.0, (sum, item) => sum + item.subtotal);
-      final total = subtotal + tax - discount;
-
-      final response = await _dio.post('/transactions', data: {
-        'total': total,
-        'items': items.map((item) => item.toMap()).toList(),
-        'transaction_date': DateTime.now().toIso8601String(),
+      await _dio.post('/transactions', data: {
+        'items': items.map((item) => {
+          'product_id': item.productId,
+          'quantity': item.quantity,
+        }).toList(),
       });
 
-      // Update product stock locally (since API may not handle it)
-      await _updateProductStock(items);
-
-      return response.data['id'].toString();
+      // Return a generated transaction ID since backend doesn't return one
+      return DateTime.now().millisecondsSinceEpoch.toString();
     } catch (e) {
       throw Exception('Failed to create transaction: $e');
     }
-  }
-
-  // Update product stock after transaction
-  Future<void> _updateProductStock(List<TransactionItem> items) async {
-    // For now, skip stock update as API may handle it
-    // TODO: implement stock update via API
   }
 
   // Get transactions

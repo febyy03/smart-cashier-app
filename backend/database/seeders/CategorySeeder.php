@@ -30,5 +30,15 @@ class CategorySeeder extends Seeder
         \App\Models\Category::create(['name' => 'Ice Cream']);
         \App\Models\Category::create(['name' => 'Cakes']);
         \App\Models\Category::create(['name' => 'Snacks']);
+
+        // Indonesian Food Categories
+        \App\Models\Category::create(['name' => 'Nasi']);
+        \App\Models\Category::create(['name' => 'Ayam']);
+        \App\Models\Category::create(['name' => 'Sate']);
+        \App\Models\Category::create(['name' => 'Bakso & Mie']);
+        \App\Models\Category::create(['name' => 'Seafood']);
+        \App\Models\Category::create(['name' => 'Minuman Tradisional']);
+        \App\Models\Category::create(['name' => 'Jus Buah']);
+        \App\Models\Category::create(['name' => 'Kopi Nusantara']);
     }
 }

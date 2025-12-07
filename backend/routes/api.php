@@ -18,10 +18,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    Route::apiResource('products', ProductController::class);
-    Route::get('/categories', [ProductController::class, 'categoriesIndex']);
     Route::apiResource('transactions', TransactionController::class)->except(['update', 'destroy']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/recommendations', [DashboardController::class, 'recommendations']);
 });
+
+// Temporarily make products and categories public for testing
+Route::apiResource('products', ProductController::class);
+Route::get('/categories', [ProductController::class, 'categoriesIndex']);

@@ -34,13 +34,16 @@ class ProductProvider with ChangeNotifier {
       print('ProductProvider: Starting to load products');
       _products = await _productService.getProducts();
       print('ProductProvider: Successfully loaded ${_products.length} products');
+      if (_products.isNotEmpty) {
+        print('ProductProvider: First product: ${_products[0].name}');
+      }
     } catch (e) {
       print('ProductProvider: Error loading products: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
-      print('ProductProvider: Finished loading products. isLoading: $_isLoading, error: $_error');
+      print('ProductProvider: Finished loading products. isLoading: $_isLoading, error: $_error, products count: ${_products.length}');
     }
   }
 
@@ -53,13 +56,16 @@ class ProductProvider with ChangeNotifier {
       print('ProductProvider: Starting to load categories');
       _categories = await _productService.getCategories();
       print('ProductProvider: Successfully loaded ${_categories.length} categories');
+      if (_categories.isNotEmpty) {
+        print('ProductProvider: First category: ${_categories[0].name}');
+      }
     } catch (e) {
       print('ProductProvider: Error loading categories: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
-      print('ProductProvider: Finished loading categories. isLoading: $_isLoading, error: $_error');
+      print('ProductProvider: Finished loading categories. isLoading: $_isLoading, error: $_error, categories count: ${_categories.length}');
     }
   }
 

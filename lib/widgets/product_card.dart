@@ -2,6 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product_model.dart';
 
+// Map of icon names to Material Design Icons
+final Map<String, IconData> _productIcons = {
+  'restaurant_menu': Icons.restaurant_menu,
+  'fastfood': Icons.fastfood,
+  'restaurant': Icons.restaurant,
+  'lunch_dining': Icons.lunch_dining,
+  'local_dining': Icons.local_dining,
+  'dinner_dining': Icons.dinner_dining,
+  'ramen_dining': Icons.ramen_dining,
+  'rice_bowl': Icons.rice_bowl,
+  'set_meal': Icons.set_meal,
+  'bakery_dining': Icons.bakery_dining,
+  'cake': Icons.cake,
+  'icecream': Icons.icecream,
+  'local_cafe': Icons.local_cafe,
+  'coffee': Icons.coffee,
+  'coffee_maker': Icons.coffee_maker,
+  'emoji_food_beverage': Icons.emoji_food_beverage,
+  'liquor': Icons.liquor,
+  'local_bar': Icons.local_bar,
+  'wine_bar': Icons.wine_bar,
+  'sports_bar': Icons.sports_bar,
+  'free_breakfast': Icons.free_breakfast,
+  'brunch_dining': Icons.brunch_dining,
+  'tapas': Icons.tap_and_play, // Using tap_and_play as tapas alternative
+  'outdoor_grill': Icons.outdoor_grill,
+  'takeout_dining': Icons.takeout_dining,
+  'delivery_dining': Icons.delivery_dining,
+  'pest_control_rodent': Icons.pest_control_rodent, // For satay
+  'grass': Icons.grass, // For traditional items
+  'park': Icons.park, // For traditional items
+  'ac_unit': Icons.ac_unit, // For cold drinks
+  'whatshot': Icons.whatshot, // For hot drinks
+  'local_florist': Icons.local_florist, // For tea
+  'spa': Icons.spa, // For beverages
+  'local_shipping': Icons.local_shipping, // For delivery items
+};
+
 class ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback? onTap;
@@ -30,7 +68,7 @@ class ProductCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Product Image
+              // Product Image/Icon
               Container(
                 width: 60,
                 height: 60,
@@ -39,20 +77,45 @@ class ProductCard extends StatelessWidget {
                   color: theme.colorScheme.surfaceContainerHighest,
                 ),
                 child: product.imageUrl.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: product.imageUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.inventory_2,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
+                    ? _productIcons.containsKey(product.imageUrl)
+                        ? Icon(
+                            _productIcons[product.imageUrl],
+                            color: theme.colorScheme.primary,
+                            size: 30,
+                          )
+                        : product.imageUrl.startsWith('http')
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: CachedNetworkImage(
+                                  imageUrl: product.imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.inventory_2,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              )
+                            : product.imageUrl.startsWith('assets/')
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      product.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Icon(
+                                        Icons.inventory_2,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        size: 30,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.inventory_2,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    size: 30,
+                                  )
                     : Icon(
                         Icons.inventory_2,
                         color: theme.colorScheme.onSurfaceVariant,

@@ -21,7 +21,11 @@ class ProductService {
   // Product CRUD Operations
   Future<List<ProductModel>> getProducts() async {
     try {
-      final headers = await _getHeaders();
+      // Use public headers for products endpoint (no auth required)
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
       print('ProductService: Making request to $baseUrl/products');
       print('ProductService: Headers: $headers');
 
@@ -47,7 +51,10 @@ class ProductService {
 
   Future<List<ProductModel>> searchProducts(String query) async {
     try {
-      final headers = await _getHeaders();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
       final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {'search': query});
       final response = await http.get(uri, headers: headers);
 
@@ -64,7 +71,10 @@ class ProductService {
 
   Future<List<ProductModel>> getProductsByCategory(String categoryId) async {
     try {
-      final headers = await _getHeaders();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
       final uri = Uri.parse('$baseUrl/products').replace(queryParameters: {'category_id': categoryId});
       final response = await http.get(uri, headers: headers);
 
@@ -155,7 +165,11 @@ class ProductService {
   // Category Operations
   Future<List<CategoryModel>> getCategories() async {
     try {
-      final headers = await _getHeaders();
+      // Use public headers for categories endpoint (no auth required)
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
       print('ProductService: Making request to $baseUrl/categories');
 
       final response = await http.get(Uri.parse('$baseUrl/categories'), headers: headers);

@@ -48,6 +48,9 @@ dependencies:
   http: ^1.2.2
   dio: ^5.7.0
 
+  # Carousel
+  carousel_slider: ^5.0.0
+
   # Notifications
   flutter_local_notifications: ^18.0.1
 

@@ -152,16 +152,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       // Clear cart
       cartProvider.clearCart();
 
-      // Show success and navigate to receipt
+      // Show success dialog
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Transaction completed successfully')),
-        );
-
-        // Navigate to receipt screen (you can implement this)
-        // Navigator.push(context, MaterialPageRoute(
-        //   builder: (context) => ReceiptScreen(transactionId: transactionId),
-        // ));
+        _showOrderCompletionDialog(transactionId);
       }
     } catch (e) {
       if (mounted) {
@@ -555,6 +548,125 @@ class _TransactionScreenState extends State<TransactionScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showOrderCompletionDialog(String transactionId) {
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent accidental dismissal
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: const EdgeInsets.all(24),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Success Icon
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  size: 48,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Success Title
+              Text(
+                'Pesanan Selesai!',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // Success Message
+              Text(
+                'Terima kasih atas pesanan Anda.\nTransaksi telah berhasil diproses.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Transaction ID
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'ID Transaksi: $transactionId',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontFamily: 'monospace',
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close dialog
+                        // Navigate to transaction history
+                        Navigator.pushNamed(context, '/transaction-history');
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: theme.colorScheme.outline),
+                      ),
+                      child: const Text('Lihat Riwayat'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close dialog
+                        // Navigate back to products for new transaction
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/products',
+                          (route) => false, // Remove all previous routes
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: const Text('Pesan Lagi'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
