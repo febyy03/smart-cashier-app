@@ -33,15 +33,18 @@ class TransactionService {
     required PaymentMethod paymentMethod,
   }) async {
     try {
-      await _dio.post('/transactions', data: {
+      final response = await _dio.post('/transactions', data: {
         'items': items.map((item) => {
           'product_id': item.productId,
           'quantity': item.quantity,
         }).toList(),
+        'payment_method': paymentMethod == PaymentMethod.cash ? 'cash' : 'digital',
+        'tax': tax,
+        'discount': discount,
       });
 
-      // Return a generated transaction ID since backend doesn't return one
-      return DateTime.now().millisecondsSinceEpoch.toString();
+      // Return transaction ID from response
+      return response.data['transaction_id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
     } catch (e) {
       throw Exception('Failed to create transaction: $e');
     }

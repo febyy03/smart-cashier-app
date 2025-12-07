@@ -127,11 +127,11 @@ class DashboardTab extends StatelessWidget {
               Expanded(
                 child: _buildStatCard(
                   context,
-                  'Kategori',
-                  '8',
-                  Icons.category,
-                  theme.colorScheme.secondaryContainer,
-                  theme.colorScheme.secondary,
+                  'Transaksi',
+                  '5',
+                  Icons.receipt,
+                  theme.colorScheme.tertiaryContainer,
+                  theme.colorScheme.tertiary,
                 ),
               ),
             ],

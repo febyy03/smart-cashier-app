@@ -65,18 +65,25 @@ class TransactionModel {
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    // Calculate subtotal from items
+    double subtotal = 0;
+    final items = (json['items'] as List<dynamic>?)
+        ?.map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
+        .toList() ?? [];
+    for (var item in items) {
+      subtotal += item.subtotal;
+    }
+
     return TransactionModel(
       id: json['id']?.toString() ?? '',
       cashierId: json['user_id']?.toString() ?? '',
       cashierName: '', // Not in API response
-      items: (json['items'] as List<dynamic>?)
-          ?.map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
-          .toList() ?? [],
-      subtotal: 0, // Calculate or from API
-      tax: 0,
-      discount: 0,
+      items: items,
+      subtotal: subtotal,
+      tax: (json['tax'] ?? 0).toDouble(),
+      discount: (json['discount'] ?? 0).toDouble(),
       total: (json['total'] ?? 0).toDouble(),
-      paymentMethod: PaymentMethod.cash, // Default
+      paymentMethod: json['payment_method'] == 'digital' ? PaymentMethod.digital : PaymentMethod.cash,
       timestamp: DateTime.parse(json['transaction_date'] ?? DateTime.now().toIso8601String()),
       receiptNumber: '', // Generate or from API
     );
